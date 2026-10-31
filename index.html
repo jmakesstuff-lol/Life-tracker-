@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3ede2">
+<title>Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#f3ede2;--paper:#fbf8f1;--ink:#2b2622;--mute:#7d7468;--line:#ddd3c3;--on:#fff;
+ --terra:#b4553a;--terra-s:#f0ddd3;--ochre:#b8862b;--ochre-s:#f2e6c9;--sage:#6f8467;--sage-s:#dfe6d8;--blue:#455a78;--blue-s:#dbe1ea;--plum:#7a4d62;--plum-s:#ecdbe3;
+ --good:#5d7f58;--bad:#a8412f;
+ --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+ --bg:#191715;--paper:#232019;--ink:#efe8db;--mute:#a0978a;--line:#38332b;--on:#191715;
+ --terra:#d9876b;--terra-s:#3a2a24;--ochre:#d9ac55;--ochre-s:#3a3220;--sage:#9bb391;--sage-s:#2a3226;--blue:#8fa7c9;--blue-s:#262d38;--plum:#c58fa8;--plum-s:#382730;
+ --good:#8fba85;--bad:#e08a76}}
+.c-terra{--acc:var(--terra);--soft:var(--terra-s)}
+.c-ochre{--acc:var(--ochre);--soft:var(--ochre-s)}
+.c-sage{--acc:var(--sage);--soft:var(--sage-s)}
+.c-blue{--acc:var(--blue);--soft:var(--blue-s)}
+.c-plum{--acc:var(--plum);--soft:var(--plum-s)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.07;z-index:0;background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#side,main{position:relative;z-index:1}
+#side{background:var(--paper);border-right:1px solid var(--line);padding:28px 16px 20px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.logo{font-family:var(--serif);font-size:28px;font-weight:500;line-height:1;letter-spacing:-.01em}
+.mark{width:34px;height:34px;display:block}
+.tag{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:6px 0 22px}
+#nav{display:flex;flex-direction:column;gap:2px}
+#nav button,#bnav button,#sheetgrid button{all:unset;cursor:pointer;box-sizing:border-box}
+#nav button{padding:9px 12px;border-radius:12px;display:flex;gap:12px;align-items:center;color:var(--mute);font-weight:500}
+#nav button:hover{background:var(--bg);color:var(--ink)}
+#nav button.on{background:var(--soft);color:var(--acc);font-weight:600}
+.ic{width:20px;height:20px;flex:none}
+.side-foot{margin-top:auto;padding:14px 6px 0;font-size:12px;color:var(--mute)}
+.side-foot .btn{margin:6px 6px 0 0;font-size:12px;padding:6px 12px;min-height:0}
+main{padding:34px 40px 60px;max-width:1040px;width:100%}
+.ph{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:6px}
+h2{margin:0;font-family:var(--serif);font-size:46px;line-height:1.05;font-weight:300;letter-spacing:-.02em}
+h2 em{font-style:italic;color:var(--acc);font-weight:300}
+h3{margin:0 0 12px;font-family:var(--serif);font-size:19px;font-weight:500}
+.art{width:120px;height:90px;flex:none}
+.lede{font-family:var(--serif);font-style:italic;font-weight:300;font-size:19px;color:var(--mute);margin:-6px 0 22px}
+.mute{color:var(--mute)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:16px}
+.stat{background:var(--paper);border:1px solid var(--line);border-top:3px solid var(--acc);border-radius:18px;padding:16px 18px;cursor:pointer;transition:transform .15s}
+.stat:hover{transform:translateY(-2px)}
+.stat .k{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);font-weight:600}
+.stat b{display:block;font-family:var(--serif);font-weight:400;font-size:38px;line-height:1.1;margin:4px 0 2px}
+.stat span:last-child{color:var(--mute);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row.sp{justify-content:space-between}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 13px;min-width:0;min-height:42px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+input[type=checkbox]{width:19px;height:19px;min-height:0;accent-color:var(--acc);padding:0;flex:none}
+input[type=range]{padding:0;accent-color:var(--acc);min-height:30px;background:none;border:none}
+textarea{width:100%;min-height:90px;resize:vertical}
+.form{display:flex;flex-wrap:wrap;gap:10px}
+.form>*{flex:1 1 150px;min-width:0}
+.form>.g{flex:3 1 240px}
+.form>.n{flex:0 1 96px}
+.form>.btn{flex:0 0 auto}
+.btn{font:inherit;font-weight:500;cursor:pointer;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:9px 18px;min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.pri{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.btn.pri:hover{opacity:.9;color:var(--on)}
+.btn.x{border:none;color:var(--mute);padding:6px 10px;min-height:36px}
+.btn.x:hover{color:var(--bad)}
+.item{display:flex;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.item .t{flex:1;min-width:0;word-break:break-word}
+.done .t{text-decoration:line-through;color:var(--mute)}
+.badge{font-size:11px;letter-spacing:.04em;padding:2px 10px;border-radius:99px;background:var(--soft,var(--bg));color:var(--acc);font-weight:600;white-space:nowrap}
+.badge.hi{background:var(--terra-s);color:var(--terra)}
+.badge.lo{background:var(--sage-s);color:var(--sage)}
+.late{color:var(--bad)}
+.datenav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.datenav .btn{padding:8px 14px}
+.bar-wrap{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:10px 0}
+.bar-fill{height:100%;background:var(--sage);border-radius:99px;transition:width .3s}
+.bar-fill.over{background:var(--bad)}
+.chart{display:flex;gap:8px;align-items:flex-end;height:130px;margin-top:6px}
+.bcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:5px}
+.bcol .bar{width:100%;max-width:46px;background:var(--acc);border-radius:8px 8px 0 0;min-height:3px}
+.bcol .bar.over{background:var(--bad)}
+.bcol small{color:var(--mute);font-size:11px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;padding:7px 15px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+.chip.on{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.note-h{display:flex;gap:10px;align-items:center;cursor:pointer}
+.note-h .tt{flex:1;font-family:var(--serif);font-size:18px}
+.note-b{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.idea{margin:0;display:flex;flex-direction:column;gap:8px}
+.idea img{width:100%;height:170px;object-fit:cover;border-radius:14px}
+.ghost{background:transparent;border:none;border-bottom:1px dashed transparent;border-radius:0;padding:3px 0;min-height:0;width:100%}
+.ghost:hover,.ghost:focus{border-bottom-color:var(--line);outline:none}
+.ghost.ttl{font-family:var(--serif);font-size:19px}
+textarea.ghost{min-height:0;resize:none;color:var(--mute);field-sizing:content}
+.lnk{font-size:13px;color:var(--acc);text-decoration:none;word-break:break-all}
+.chk{display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer}
+iframe{border:0;width:100%;border-radius:14px}
+.calframe{height:max(620px,72vh);background:#fff}
+.hab{padding:14px 0;border-bottom:1px solid var(--line)}
+.hab:last-child{border-bottom:none}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.days div{text-align:center;font-size:11px;color:var(--mute)}
+.hcell{width:100%;max-width:44px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--bg);cursor:pointer;margin:4px auto 0;display:block;font:inherit;color:var(--on)}
+.hcell.on{background:var(--acc);border-color:var(--acc)}
+.mood{font:inherit;font-size:13.5px;cursor:pointer;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:7px 15px}
+.mood.on{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.limit{display:grid;grid-template-columns:90px 1fr 100px;gap:12px;align-items:center;padding:8px 0}
+.limit .bar-wrap{margin:0}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99}
+#toast.show{opacity:1}
+#top,#bnav,#sheet{display:none}
+
+@media(max-width:820px){
+ body{display:block}
+ #side{display:none}
+ #top{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top)) 18px 12px}
+ #top .mark{width:28px;height:28px}
+ main{padding:22px 16px calc(110px + env(safe-area-inset-bottom))}
+ h2{font-size:34px}
+ .art{width:78px;height:58px}
+ .ph{margin-bottom:20px;padding-bottom:16px}
+ .card{padding:16px;border-radius:18px}
+ input,select,textarea{font-size:16px}
+ .btn{min-height:44px}
+ .grid{grid-template-columns:1fr 1fr;gap:10px}
+ .stat{padding:14px}
+ .stat b{font-size:32px}
+ .form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .form>*{flex:none}
+ .form>.g,.form>.btn,.form>.full,.form>textarea{grid-column:span 2}
+ .calframe{height:calc(100vh - 330px);min-height:480px}
+ .limit{grid-template-columns:76px 1fr 88px}
+ .ideas{grid-template-columns:1fr}
+ #bnav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--paper);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+ #bnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;color:var(--mute);border-radius:12px}
+ #bnav button.on{color:var(--acc);font-weight:600}
+ #sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50}
+ #sheet.open{display:block}
+ .sheet-in{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:24px 24px 0 0;padding:20px 18px calc(96px + env(safe-area-inset-bottom))}
+ #sheetgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+ #sheetgrid button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;border-radius:16px;background:var(--bg);font-size:13px;font-weight:500}
+ #sheetgrid button.on{background:var(--soft);color:var(--acc)}
+ .sheet-in .row .btn{flex:1}
+}
+</style>
+</head>
+<body>
+<aside id="side">
+  <div class="logo"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M6 36V20a14 14 0 0 1 28 0v16z" fill="var(--terra)"/><circle cx="27" cy="12" r="6" fill="var(--ochre)"/></svg></div>
+  <div class="tag">a quiet place for everything</div>
+  <nav id="nav"></nav>
+  <div class="side-foot">
+    Saved automatically in this browser.<br>
+    <button class="btn" onclick="exportData()">Back up</button>
+    <button class="btn" onclick="$('imp').click()">Restore</button>
+  </div>
+</aside>
+<div id="top"><div class="logo"><svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M6 36V20a14 14 0 0 1 28 0v16z" fill="var(--terra)"/><circle cx="27" cy="12" r="6" fill="var(--ochre)"/></svg></div></div>
+<main id="main"></main>
+<nav id="bnav"></nav>
+<div id="sheet" onclick="if(event.target===this)toggleSheet()">
+  <div class="sheet-in">
+    <div id="sheetgrid"></div>
+    <div class="row"><button class="btn" onclick="exportData()">Back up</button><button class="btn" onclick="$('imp').click()">Restore</button></div>
+  </div>
+</div>
+<input type="file" id="imp" accept=".json" hidden onchange="importData(this)">
+<div id="toast"></div>
+
+<script>
+/* ---------- storage ---------- */
+const KEY='lifehub.v1';
+const defaults={cal:{srcs:[],mode:'MONTH'},reminders:[],workouts:{},calories:{},calGoal:1800,water:{},notes:[],videos:[],ideas:[],habits:[],journal:{},goals:[],budget:[],limits:{},v2:false};
+let S;
+try{S=Object.assign({},defaults,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=JSON.parse(JSON.stringify(defaults))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+/* one-time upgrade from the first version */
+if(!S.v2){
+  if(S.calGoal===2000)S.calGoal=1800;
+  if(S.videos&&S.videos.length){S.ideas=(S.ideas||[]).concat(S.videos.map(v=>({id:v.id,cat:'Videos',title:v.title,url:v.url,img:'',note:v.tag?('#'+v.tag):'',done:!!v.watched,t:Date.now()})));S.videos=[]}
+  S.v2=true;save();
+}
+
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>ymd(new Date());
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)};
+const fmtDate=s=>parse(s).toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const sum=(a,k)=>a.reduce((s,x)=>s+(+x[k]||0),0);
+const fm=x=>(x<0?'-':'')+'$'+Math.abs(x).toFixed(2);
+const val=id=>{const e=$(id);return e?e.value.trim():''};
+const host=u=>{try{return new URL(u).hostname.replace('www.','')}catch(e){return u}};
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+function mut(fn){fn();save();render()}
+
+/* ---------- icons & art ---------- */
+const I={
+ home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ bell:'<path d="M6 17v-6a6 6 0 0 1 12 0v6l2 2H4zM10 21h4"/>',
+ bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10c1 1 1 2 1 3h6c0-1 0-2 1-3a6 6 0 0 0-4-10z"/>',
+ note:'<path d="M5 3h10l4 4v14H5zM14 3v5h5M8 12h8M8 16h6"/>',
+ dumb:'<path d="M6 7v10M3 10v4M18 7v10M21 10v4M6 12h12"/>',
+ leaf:'<path d="M12 7c-2-2-7-1-7 5 0 5 3 9 5 9 1 0 1-.5 2-.5s1 .5 2 .5c2 0 5-4 5-9 0-6-5-7-7-5zM12 7c0-2 1-4 3-5"/>',
+ coin:'<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.6 2.2 0 0 0-2.5-1.6c-1.5 0-2.5.7-2.5 1.8 0 2.5 5 1.2 5 3.7 0 1.1-1 1.8-2.5 1.8a2.6 2.2 0 0 1-2.5-1.6M12 6v2M12 16v2"/>',
+ check:'<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+ target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+ book:'<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/>',
+ more:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>'
+};
+const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
+function art(n){
+  const v=[
+   '<path d="M10 108V58a36 36 0 0 1 72 0v50z" fill="var(--acc)"/><circle cx="112" cy="44" r="22" fill="var(--soft)" stroke="var(--acc)" stroke-width="1.5"/><path d="M96 108h56" stroke="var(--acc)" stroke-width="1.5"/>',
+   '<circle cx="60" cy="60" r="40" fill="var(--soft)" stroke="var(--acc)" stroke-width="1.5"/><path d="M100 108V70a22 22 0 0 1 44 0v38z" fill="var(--acc)" opacity=".85"/>',
+   '<rect x="14" y="30" width="60" height="78" rx="30" fill="var(--acc)"/><circle cx="108" cy="78" r="26" fill="var(--soft)"/><path d="M90 30c14 0 30 6 40 0" stroke="var(--acc)" stroke-width="1.5" fill="none"/><circle cx="118" cy="30" r="8" fill="var(--acc)"/>',
+   '<path d="M12 108c0-40 30-70 70-70v70z" fill="var(--acc)" opacity=".9"/><circle cx="116" cy="62" r="30" fill="var(--soft)"/><path d="M116 32v60M86 62h60" stroke="var(--acc)" stroke-width="1.2"/>'
+  ][n%4];
+  return `<svg class="art" viewBox="0 0 160 120" aria-hidden="true">${v}</svg>`;
+}
+
+let curDate=today();
+function dateNav(){return `<div class="datenav"><button class="btn" onclick="shiftDate(-1)">‹</button><input type="date" value="${curDate}" onchange="setDate(this.value)"><button class="btn" onclick="shiftDate(1)">›</button><button class="btn" onclick="setDate(today())">Today</button></div>`}
+function shiftDate(n){curDate=addDays(curDate,n);render()}
+function setDate(v){if(v){curDate=v;render()}}
+
+/* ---------- HOME ---------- */
+function rHome(){
+  const t=today(),n=new Date();
+  const due=S.reminders.filter(r=>!r.done&&r.due&&r.due.slice(0,10)<=t).length;
+  const eaten=sum(S.calories[t]||[],'cal');
+  const w=S.workouts[t]?S.workouts[t].items.length:0;
+  const hab=S.habits.length?S.habits.filter(x=>x.log[t]).length+'/'+S.habits.length:'—';
+  const next=S.reminders.filter(r=>!r.done).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1).slice(0,5);
+  return `
+  <div class="grid">
+    <div class="stat c-ochre" onclick="go('reminders')"><span class="k">Reminders</span><b>${due}</b><span>due or overdue</span></div>
+    <div class="stat c-sage" onclick="go('calories')"><span class="k">Nourishment</span><b>${eaten}</b><span>of ${S.calGoal} calories</span></div>
+    <div class="stat c-terra" onclick="go('workouts')"><span class="k">Movement</span><b>${w}</b><span>exercises today</span></div>
+    <div class="stat c-blue" onclick="go('habits')"><span class="k">Habits</span><b>${hab}</b><span>done today</span></div>
+  </div>
+  <div class="card"><h3>Quick capture</h3>
+    <div class="form"><input id="qa" class="g" placeholder="Add a reminder…" onkeydown="if(event.key==='Enter')quickAdd()"><button class="btn pri" onclick="quickAdd()">Add</button></div>
+  </div>
+  <div class="card c-ochre"><h3>Up next</h3>${next.length?next.map(remRow).join(''):'<p class="mute" style="margin:0">Nothing on your list. Enjoy the space.</p>'}</div>`;
+}
+function quickAdd(){const v=val('qa');if(!v)return;mut(()=>S.reminders.push({id:uid(),text:v,due:'',pri:'med',done:false}));toast('Reminder added')}
+
+/* ---------- CALENDAR ---------- */
+function calUrl(){
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const srcs=S.cal.srcs.map(s=>'&src='+encodeURIComponent(s)).join('');
+  return 'https://calendar.google.com/calendar/embed?ctz='+encodeURIComponent(tz)+'&mode='+S.cal.mode+'&showTitle=0&showPrint=0'+srcs;
+}
+function rCal(){
+  const c=S.cal;
+  if(!c.srcs.length){
+    return `<div class="card">
+      <h3>Connect Google Calendar</h3>
+      <p style="margin-top:0">Enter your Google account email (or a calendar ID). Separate several calendars with commas. You can also paste the embed code or embed link from Google Calendar settings.</p>
+      <div class="form"><input id="calsrc" class="g" placeholder="you@gmail.com" onkeydown="if(event.key==='Enter')connectCal()"><button class="btn pri" onclick="connectCal()">Connect</button></div>
+      <p class="mute" style="margin:14px 0 0;font-size:13.5px">This works best when you're signed in to Google in the same browser. If the calendar shows blank, open Google Calendar → Settings → your calendar → <b>Integrate calendar</b> and copy the embed code from there.</p>
+    </div>`;
+  }
+  const modes=['MONTH','WEEK','AGENDA'];
+  return `<div class="row sp" style="margin-bottom:14px">
+    <div class="chips" style="margin:0">${modes.map(m=>`<button class="chip ${c.mode===m?'on':''}" onclick="mut(()=>S.cal.mode='${m}')">${m[0]+m.slice(1).toLowerCase()}</button>`).join('')}</div>
+    <div class="row">
+      <a class="btn" href="https://calendar.google.com/calendar/r/eventedit" target="_blank" rel="noopener">＋ New event</a>
+      <a class="btn" href="https://calendar.google.com/calendar" target="_blank" rel="noopener">Open Google Calendar</a>
+      <button class="btn x" onclick="if(confirm('Disconnect calendar?'))mut(()=>S.cal.srcs=[])">Change</button>
+    </div>
+  </div>
+  <iframe class="calframe" src="${esc(calUrl())}" title="Google Calendar"></iframe>`;
+}
+function connectCal(){
+  let v=val('calsrc');if(!v)return;
+  let srcs=[];
+  const m=v.match(/src="([^"]+)"/);if(m)v=m[1];
+  if(/^https?:/i.test(v)){try{srcs=new URL(v.replace(/&amp;/g,'&')).searchParams.getAll('src')}catch(e){}}
+  else srcs=v.split(/[,\n]/).map(s=>s.trim()).filter(Boolean);
+  if(!srcs.length){toast('Could not find a calendar in that');return}
+  mut(()=>{S.cal.srcs=srcs;S.cal.mode=window.innerWidth<700?'AGENDA':'MONTH'});
+}
+
+/* ---------- REMINDERS ---------- */
+function remRow(r){
+  const t=today();let when='';
+  if(r.due){const late=!r.done&&r.due.slice(0,10)<t;when=`<span class="${late?'late':'mute'}" style="font-size:12px;white-space:nowrap">${new Date(r.due).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>`}
+  const pb=r.pri==='high'?'<span class="badge hi">high</span>':r.pri==='low'?'<span class="badge lo">low</span>':'';
+  return `<div class="item ${r.done?'done':''}"><input type="checkbox" ${r.done?'checked':''} onchange="toggleRem('${r.id}')"><span class="t">${esc(r.text)}</span>${pb}${when}<button class="btn x" onclick="delRem('${r.id}')">✕</button></div>`;
+}
+function rRem(){
+  const t=today();
+  const open=S.reminders.filter(r=>!r.done).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
+  const groups=[['Overdue',open.filter(r=>r.due&&r.due.slice(0,10)<t)],['Today',open.filter(r=>r.due&&r.due.slice(0,10)===t)],['Upcoming',open.filter(r=>r.due&&r.due.slice(0,10)>t)],['Someday',open.filter(r=>!r.due)]];
+  const done=S.reminders.filter(r=>r.done);
+  const perm=('Notification' in window)?Notification.permission:'unsupported';
+  return `<div class="card"><div class="form">
+    <input id="rt" class="g" placeholder="Remind me to…" onkeydown="if(event.key==='Enter')addRem()">
+    <input id="rd" type="datetime-local" class="full">
+    <select id="rp"><option value="med">Normal</option><option value="high">High</option><option value="low">Low</option></select>
+    <button class="btn pri" onclick="addRem()">Add</button></div>
+    ${perm==='default'?'<p class="mute" style="margin:12px 0 0;font-size:13px">Want a pop-up when something is due? <a href="#" onclick="askNotify();return false" style="color:var(--acc)">Turn on notifications</a> (works while this page is open).</p>':''}
+  </div>
+  ${groups.filter(g=>g[1].length).map(g=>`<div class="card"><h3>${g[0]} <span class="mute" style="font-family:var(--sans);font-size:14px">${g[1].length}</span></h3>${g[1].map(remRow).join('')}</div>`).join('')||'<p class="lede">No open reminders.</p>'}
+  ${done.length?`<div class="card"><div class="row sp"><h3 style="margin:0">Done · ${done.length}</h3><button class="btn" onclick="mut(()=>S.reminders=S.reminders.filter(r=>!r.done))">Clear done</button></div>${done.map(remRow).join('')}</div>`:''}`;
+}
+function addRem(){const v=val('rt');if(!v)return;const d=val('rd'),p=val('rp');mut(()=>S.reminders.push({id:uid(),text:v,due:d,pri:p,done:false}))}
+function toggleRem(id){mut(()=>{const r=S.reminders.find(x=>x.id===id);if(r)r.done=!r.done})}
+function delRem(id){mut(()=>S.reminders=S.reminders.filter(r=>r.id!==id))}
+function askNotify(){Notification.requestPermission().then(()=>render())}
+setInterval(()=>{
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  const n=new Date(),now=ymd(n)+'T'+pad(n.getHours())+':'+pad(n.getMinutes());
+  let ch=false;
+  S.reminders.forEach(r=>{if(!r.done&&r.due&&!r.notified&&r.due<=now){try{new Notification('Reminder',{body:r.text})}catch(e){}r.notified=true;ch=true}});
+  if(ch)save();
+},30000);
+
+/* ---------- IDEAS (videos, recipes, outfits, trips, shopping, brainstorm) ---------- */
+const ICATS=['Videos','Recipes','Outfits','Trips','Shopping','Brainstorm'];
+const IDONE={Videos:'Watched',Recipes:'Tried it',Outfits:'Worn',Trips:'Booked',Shopping:'Bought',Brainstorm:'Done'};
+const IPH={Videos:'What is it?',Recipes:'Recipe name',Outfits:'Outfit idea',Trips:'Where to?',Shopping:'What to buy?',Brainstorm:'The idea'};
+let iCat='All',iQ='',shown={};
+function embedUrl(u){
+  if(!u)return '';
+  let m=u.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);if(m&&/youtu\.?be/i.test(u))return 'https://www.youtube.com/embed/'+m[1];
+  m=u.match(/tiktok\.com\/.*video\/(\d+)/);if(m)return 'https://www.tiktok.com/embed/v2/'+m[1];
+  return '';
+}
+function ideaGrid(){
+  const q=iQ.toLowerCase();
+  const arr=S.ideas.filter(i=>(iCat==='All'||i.cat===iCat)&&(!q||(i.title+' '+i.note+' '+i.url).toLowerCase().includes(q))).sort((a,b)=>(a.done-b.done)||b.t-a.t);
+  if(!arr.length)return '<p class="lede">Nothing here yet. Save your first idea above.</p>';
+  return '<div class="ideas">'+arr.map(i=>{
+    const e=embedUrl(i.url),tk=/tiktok/.test(e);
+    return `<div class="card idea ${i.done?'done':''}">
+      <div class="row sp"><span class="badge">${esc(i.cat)}</span><button class="btn x" onclick="delIdea('${i.id}')">✕</button></div>
+      ${i.img?`<img src="${esc(i.img)}" alt="" loading="lazy" onerror="this.remove()">`:''}
+      <input class="ghost ttl" value="${esc(i.title)}" placeholder="Title" oninput="setIdea('${i.id}','title',this.value)">
+      <textarea class="ghost" rows="2" placeholder="Notes…" oninput="setIdea('${i.id}','note',this.value)">${esc(i.note)}</textarea>
+      ${i.url?`<a class="lnk" href="${esc(i.url)}" target="_blank" rel="noopener">↗ ${esc(host(i.url))}</a>`:''}
+      ${shown[i.id]&&e?`<iframe src="${esc(e)}" style="height:${tk?'700':'220'}px" allowfullscreen allow="encrypted-media;picture-in-picture"></iframe>`:''}
+      <div class="row sp"><label class="chk"><input type="checkbox" ${i.done?'checked':''} onchange="toggleIdea('${i.id}')">${IDONE[i.cat]||'Done'}</label>${e?`<button class="btn" onclick="toggleShow('${i.id}')">${shown[i.id]?'Hide':'▶ Play'}</button>`:''}</div>
+    </div>`}).join('')+'</div>';
+}
+function rIdeas(){
+  const cats=['All',...ICATS];
+  return `<div class="card"><div class="form">
+    <select id="ic" style="flex:0 1 160px">${ICATS.map(c=>`<option ${iCat===c?'selected':''}>${c}</option>`).join('')}</select>
+    <input id="it" class="g" placeholder="Title or idea" onkeydown="if(event.key==='Enter')addIdea()">
+    <input id="iu" class="g" placeholder="Link (video, recipe, product, trip…)">
+    <input id="ii" class="g" placeholder="Image link (optional, great for outfits)">
+    <textarea id="in" rows="2" placeholder="Notes" style="min-height:60px"></textarea>
+    <button class="btn pri" onclick="addIdea()">Save idea</button></div></div>
+  <div class="row" style="margin-bottom:14px"><div class="chips" style="margin:0;flex:1">${cats.map(c=>`<button class="chip ${iCat===c?'on':''}" onclick="iCat='${c}';render()">${c}</button>`).join('')}</div>
+  <input placeholder="Search ideas…" value="${esc(iQ)}" oninput="iQ=this.value;$('ideagrid').innerHTML=ideaGrid()" style="flex:0 1 220px"></div>
+  <div id="ideagrid">${ideaGrid()}</div>`;
+}
+function addIdea(){
+  let u=val('iu'),im=val('ii'),t=val('it');
+  if(u&&!/^https?:/i.test(u))u='https://'+u;
+  if(im&&!/^https?:/i.test(im))im='https://'+im;
+  if(!t&&!u)return;
+  if(!t)t=host(u);
+  mut(()=>S.ideas.unshift({id:uid(),cat:val('ic'),title:t,url:u,img:im,note:val('in'),done:false,t:Date.now()}));
+  toast('Idea saved');
+}
+function setIdea(id,k,v){const i=S.ideas.find(x=>x.id===id);if(i){i[k]=v;save()}}
+function toggleIdea(id){const i=S.ideas.find(x=>x.id===id);i.done=!i.done;save();$('ideagrid').innerHTML=ideaGrid()}
+function toggleShow(id){shown[id]=!shown[id];$('ideagrid').innerHTML=ideaGrid()}
+function delIdea(id){mut(()=>S.ideas=S.ideas.filter(i=>i.id!==id))}
+
+/* ---------- NOTES & LISTS ---------- */
+let noteQ='';
+function notesList(){
+  const q=noteQ.toLowerCase();
+  const arr=S.notes.filter(n=>!q||(n.title+' '+n.body+' '+n.items.map(i=>i.t).join(' ')).toLowerCase().includes(q)).sort((a,b)=>(b.pin?1:0)-(a.pin?1:0)||b.t-a.t);
+  if(!arr.length)return '<p class="lede">Nothing here yet. Start a note or a checklist.</p>';
+  return arr.map(n=>{
+    const done=n.items.filter(i=>i.d).length;
+    const meta=n.type==='list'?`${done}/${n.items.length}`:'';
+    return `<div class="card"><div class="note-h" onclick="toggleNote('${n.id}')"><span class="mute">${n.open?'▾':'▸'}</span><span class="tt">${esc(n.title||'Untitled')}</span><span class="badge">${n.type==='list'?'List '+meta:'Note'}</span><button class="btn x" title="Pin" onclick="event.stopPropagation();pinNote('${n.id}')">${n.pin?'★':'☆'}</button></div>
+    ${n.open?`<div class="note-b">
+      <input value="${esc(n.title)}" placeholder="Title" oninput="setNote('${n.id}','title',this.value)">
+      ${n.type==='note'?`<textarea placeholder="Write your ideas…" style="min-height:140px" oninput="setNote('${n.id}','body',this.value)">${esc(n.body)}</textarea>`:`
+        <div>${n.items.map(i=>`<div class="item ${i.d?'done':''}"><input type="checkbox" ${i.d?'checked':''} onchange="toggleItem('${n.id}','${i.id}')"><span class="t">${esc(i.t)}</span><button class="btn x" onclick="delItem('${n.id}','${i.id}')">✕</button></div>`).join('')}</div>
+        <input id="ni-${n.id}" placeholder="Add an item and press Enter" onkeydown="if(event.key==='Enter')addItem('${n.id}')">`}
+      <div><button class="btn x" onclick="if(confirm('Delete this?'))delNote('${n.id}')">Delete</button></div>
+    </div>`:''}</div>`}).join('');
+}
+function rNotes(){
+  return `<div class="form" style="margin-bottom:16px"><input class="g" placeholder="Search notes…" value="${esc(noteQ)}" oninput="noteQ=this.value;$('notelist').innerHTML=notesList()"><button class="btn pri" onclick="addNote('note')">＋ Note</button><button class="btn pri" onclick="addNote('list')">＋ Checklist</button></div>
+  <div id="notelist">${notesList()}</div>`;
+}
+const findN=id=>S.notes.find(n=>n.id===id);
+function addNote(type){mut(()=>S.notes.push({id:uid(),type,title:'',body:'',items:[],open:true,pin:false,t:Date.now()}))}
+function setNote(id,k,v){findN(id)[k]=v;save()}
+function redrawNotes(){$('notelist').innerHTML=notesList()}
+function toggleNote(id){const n=findN(id);n.open=!n.open;save();redrawNotes()}
+function pinNote(id){const n=findN(id);n.pin=!n.pin;save();redrawNotes()}
+function delNote(id){S.notes=S.notes.filter(n=>n.id!==id);save();redrawNotes()}
+function addItem(id){const e=$('ni-'+id),v=e.value.trim();if(!v)return;findN(id).items.push({id:uid(),t:v,d:false});save();redrawNotes();const f=$('ni-'+id);if(f)f.focus()}
+function toggleItem(id,iid){const i=findN(id).items.find(x=>x.id===iid);i.d=!i.d;save();redrawNotes()}
+function delItem(id,iid){const n=findN(id);n.items=n.items.filter(x=>x.id!==iid);save();redrawNotes()}
+
+/* ---------- WORKOUTS ---------- */
+function wDay(d){return S.workouts[d]||(S.workouts[d]={title:'',items:[]})}
+function rWork(){
+  const w=S.workouts[curDate]||{title:'',items:[]};
+  let days=0,mins=0;
+  for(let i=0;i<7;i++){const x=S.workouts[addDays(curDate,-i)];if(x&&x.items.length){days++;mins+=sum(x.items,'mins')}}
+  return `${dateNav()}
+  <div class="grid">
+    <div class="stat c-terra"><span class="k">This week</span><b>${days}/7</b><span>active days</span></div>
+    <div class="stat c-terra"><span class="k">Minutes</span><b>${mins}</b><span>over the same 7 days</span></div>
+    <div class="stat c-terra"><span class="k">This day</span><b>${w.items.length}</b><span>exercises</span></div>
+  </div>
+  <div class="card">
+    <div class="form"><input id="wt" class="g" placeholder="Workout name (Push day, 5K run…)" value="${esc(w.title)}" oninput="wDay(curDate).title=this.value;save()"><button class="btn" onclick="copyYesterday()">Copy previous day</button></div>
+    <div style="margin-top:10px">${w.items.map(i=>`<div class="item ${i.done?'done':''}"><input type="checkbox" ${i.done?'checked':''} onchange="toggleEx('${i.id}')"><span class="t"><b>${esc(i.name)}</b> <span class="mute">${i.sets?i.sets+' sets':''}${i.reps?' × '+i.reps+' reps':''}${i.weight?' @ '+i.weight+' lb':''}${i.mins?' · '+i.mins+' min':''}</span></span><button class="btn x" onclick="delEx('${i.id}')">✕</button></div>`).join('')||'<p class="mute" style="margin:8px 0 0">No exercises yet. Rest day, or add one below.</p>'}</div>
+  </div>
+  <div class="card"><h3>Add exercise</h3><div class="form">
+    <input id="wn" class="g" placeholder="Exercise" onkeydown="if(event.key==='Enter')addEx()">
+    <input id="ws" class="n" type="number" min="0" inputmode="numeric" placeholder="Sets">
+    <input id="wr" class="n" type="number" min="0" inputmode="numeric" placeholder="Reps">
+    <input id="ww" class="n" type="number" min="0" inputmode="numeric" placeholder="lb">
+    <input id="wm" class="n" type="number" min="0" inputmode="numeric" placeholder="Min">
+    <button class="btn pri" onclick="addEx()">Add</button></div></div>`;
+}
+function addEx(){const n=val('wn');if(!n)return;mut(()=>wDay(curDate).items.push({id:uid(),name:n,sets:val('ws'),reps:val('wr'),weight:val('ww'),mins:val('wm'),done:false}))}
+function toggleEx(id){mut(()=>{const i=wDay(curDate).items.find(x=>x.id===id);if(i)i.done=!i.done})}
+function delEx(id){mut(()=>{const w=wDay(curDate);w.items=w.items.filter(x=>x.id!==id)})}
+function copyYesterday(){
+  const p=S.workouts[addDays(curDate,-1)];
+  if(!p||!p.items.length){toast('Nothing logged the day before');return}
+  mut(()=>{const w=wDay(curDate);if(!w.title)w.title=p.title;p.items.forEach(i=>w.items.push(Object.assign({},i,{id:uid(),done:false})))});
+}
+
+/* ---------- CALORIES ---------- */
+const MEALS=['Breakfast','Lunch','Dinner','Snack'];
+function rCals(){
+  const items=S.calories[curDate]||[],goal=+S.calGoal||1800,tot=sum(items,'cal'),left=goal-tot;
+  const bars=[];
+  for(let i=6;i>=0;i--){const d=addDays(curDate,-i),c=sum(S.calories[d]||[],'cal');bars.push(`<div class="bcol"><div class="bar ${c>goal?'over':''}" style="height:${Math.min(c/goal*100,100)}%" title="${c} cal"></div><small>${d.slice(5)}</small></div>`)}
+  const water=S.water[curDate]||0;
+  return `${dateNav()}
+  <div class="card">
+    <div class="row sp"><h3 style="margin:0;font-size:26px;font-weight:400">${tot} <span class="mute" style="font-size:16px">/ ${goal} cal</span></h3><span class="${left<0?'late':'mute'}">${left>=0?left+' left':(-left)+' over'}</span></div>
+    <div class="bar-wrap"><div class="bar-fill ${left<0?'over':''}" style="width:${Math.min(tot/goal*100,100)}%"></div></div>
+    <div class="row mute" style="font-size:13px"><span>Protein ${sum(items,'p')} g</span><span>Carbs ${sum(items,'c')} g</span><span>Fat ${sum(items,'f')} g</span></div>
+    <div class="row" style="margin-top:14px"><label class="mute">Daily goal</label><input type="number" inputmode="numeric" value="${goal}" style="width:110px" onchange="S.calGoal=+this.value||1800;save();render()"></div>
+  </div>
+  <div class="card"><h3>Water</h3><div class="row"><button class="btn" onclick="water(-1)">−</button><b style="font-family:var(--serif);font-size:24px;font-weight:400">${water}</b><span class="mute">glasses</span><button class="btn" onclick="water(1)">＋</button></div></div>
+  <div class="card"><h3>Add food</h3><div class="form">
+    <select id="cm" style="flex:0 1 140px">${MEALS.map(m=>`<option>${m}</option>`).join('')}</select>
+    <input id="cn" class="g" placeholder="Food" onkeydown="if(event.key==='Enter')addFood()">
+    <input id="cc" class="n" type="number" min="0" inputmode="numeric" placeholder="Cal">
+    <input id="cp" class="n" type="number" min="0" inputmode="numeric" placeholder="P g">
+    <input id="cr" class="n" type="number" min="0" inputmode="numeric" placeholder="C g">
+    <input id="cf" class="n" type="number" min="0" inputmode="numeric" placeholder="F g">
+    <button class="btn pri" onclick="addFood()">Add</button></div></div>
+  ${MEALS.map(m=>{const a=items.filter(x=>x.meal===m);return a.length?`<div class="card"><div class="row sp"><h3 style="margin:0">${m}</h3><span class="mute">${sum(a,'cal')} cal</span></div>${a.map(x=>`<div class="item"><span class="t">${esc(x.name)}</span><span class="mute">${x.cal||0} cal</span><button class="btn x" onclick="delFood('${x.id}')">✕</button></div>`).join('')}</div>`:''}).join('')}
+  <div class="card"><h3>Last 7 days</h3><div class="chart">${bars.join('')}</div></div>`;
+}
+function addFood(){const n=val('cn');if(!n)return;mut(()=>{(S.calories[curDate]=S.calories[curDate]||[]).push({id:uid(),meal:val('cm'),name:n,cal:+val('cc')||0,p:+val('cp')||0,c:+val('cr')||0,f:+val('cf')||0})})}
+function delFood(id){mut(()=>S.calories[curDate]=S.calories[curDate].filter(x=>x.id!==id))}
+function water(n){mut(()=>S.water[curDate]=Math.max(0,(S.water[curDate]||0)+n))}
+
+/* ---------- HABITS ---------- */
+function streak(h){let d=today(),n=0;if(!h.log[d])d=addDays(d,-1);while(h.log[d]){n++;d=addDays(d,-1)}return n}
+function rHab(){
+  const t=today(),days=[];for(let i=6;i>=0;i--)days.push(addDays(t,-i));
+  return `<div class="card"><div class="form"><input id="hn" class="g" placeholder="New habit (Drink water, Read 10 pages…)" onkeydown="if(event.key==='Enter')addHab()"><button class="btn pri" onclick="addHab()">Add</button></div></div>
+  ${S.habits.length?`<div class="card">${S.habits.map(h=>`<div class="hab"><div class="row sp"><b style="font-family:var(--serif);font-weight:500;font-size:17px">${esc(h.name)}</b><span class="row"><span class="badge">${streak(h)} day streak</span><button class="btn x" onclick="delHab('${h.id}')">✕</button></span></div>
+    <div class="days">${days.map(d=>`<div>${parse(d).toLocaleDateString(undefined,{weekday:'short'}).slice(0,2)}<button class="hcell ${h.log[d]?'on':''}" onclick="togHab('${h.id}','${d}')">${h.log[d]?'✓':''}</button></div>`).join('')}</div></div>`).join('')}</div>`:'<p class="lede">Add your first habit above.</p>'}`;
+}
+function addHab(){const v=val('hn');if(!v)return;mut(()=>S.habits.push({id:uid(),name:v,log:{}}))}
+function togHab(id,d){mut(()=>{const h=S.habits.find(x=>x.id===id);if(h.log[d])delete h.log[d];else h.log[d]=true})}
+function delHab(id){if(confirm('Delete this habit?'))mut(()=>S.habits=S.habits.filter(h=>h.id!==id))}
+
+/* ---------- GOALS ---------- */
+function rGoals(){
+  return `<div class="card"><div class="form"><input id="gt" class="g" placeholder="A goal (Run a 10K, Save for a trip…)" onkeydown="if(event.key==='Enter')addGoal()"><input id="gd" type="date"><button class="btn pri" onclick="addGoal()">Add</button></div></div>
+  ${S.goals.map(g=>`<div class="card"><div class="row sp"><b style="font-family:var(--serif);font-weight:500;font-size:18px">${esc(g.title)}</b><span class="row"><span class="mute" style="font-size:13px">${g.due?'by '+parse(g.due).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):''}</span><button class="btn x" onclick="delGoal('${g.id}')">✕</button></span></div>
+    <div class="row" style="flex-wrap:nowrap"><input type="range" min="0" max="100" value="${g.p}" style="flex:1" oninput="setGoal('${g.id}',this.value)"><b id="gp-${g.id}" style="min-width:44px;text-align:right">${g.p}%</b></div></div>`).join('')||'<p class="lede">No goals yet.</p>'}`;
+}
+function addGoal(){const v=val('gt');if(!v)return;mut(()=>S.goals.push({id:uid(),title:v,due:val('gd'),p:0}))}
+function setGoal(id,v){S.goals.find(g=>g.id===id).p=+v;$('gp-'+id).textContent=v+'%';save()}
+function delGoal(id){mut(()=>S.goals=S.goals.filter(g=>g.id!==id))}
+
+/* ---------- JOURNAL ---------- */
+const MOODS=['Radiant','Good','Okay','Low','Heavy'];
+function rJour(){
+  const j=S.journal[curDate]||{mood:'',text:'',grat:''};
+  const past=Object.keys(S.journal).sort().reverse().filter(d=>d!==curDate&&(S.journal[d].text||S.journal[d].grat)).slice(0,8);
+  return `${dateNav()}
+  <div class="card"><div class="row" style="margin-bottom:12px">${MOODS.map(m=>`<button class="mood ${j.mood===m?'on':''}" onclick="setMood('${m}')">${m}</button>`).join('')}</div>
+    <textarea placeholder="Write about your day…" style="min-height:180px" oninput="jset('text',this.value)">${esc(j.text)}</textarea>
+    <input style="width:100%;margin-top:10px" placeholder="One thing I'm grateful for…" value="${esc(j.grat)}" oninput="jset('grat',this.value)"></div>
+  ${past.length?`<div class="card"><h3>Recent pages</h3>${past.map(d=>`<div class="item" style="cursor:pointer" onclick="setDate('${d}')"><span class="t">${esc(S.journal[d].text||S.journal[d].grat).slice(0,90)}</span><span class="mute" style="font-size:12px">${S.journal[d].mood||''} · ${d.slice(5)}</span></div>`).join('')}</div>`:''}`;
+}
+function jset(k,v){const j=S.journal[curDate]=S.journal[curDate]||{mood:'',text:'',grat:''};j[k]=v;save()}
+function setMood(m){const j=S.journal[curDate]=S.journal[curDate]||{mood:'',text:'',grat:''};j.mood=j.mood===m?'':m;save();render()}
+
+/* ---------- BUDGET ---------- */
+let bMonth=today().slice(0,7);
+const CATS=['Food','Home','Transport','Fun','Bills','Health','Shopping','Savings','Other'];
+function rBud(){
+  const es=S.budget.filter(e=>e.date.startsWith(bMonth)).sort((a,b)=>b.date.localeCompare(a.date));
+  const inc=es.filter(e=>e.type==='in').reduce((s,e)=>s+e.amt,0),exp=es.filter(e=>e.type==='out').reduce((s,e)=>s+e.amt,0);
+  const by={};es.filter(e=>e.type==='out').forEach(e=>by[e.cat]=(by[e.cat]||0)+e.amt);
+  const lim=S.limits||{};
+  const totLim=CATS.reduce((s,c)=>s+(+lim[c]||0),0);
+  const label=parse(bMonth+'-01').toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  return `<div class="datenav"><button class="btn" onclick="shiftMonth(-1)">‹</button><b style="font-family:var(--serif);font-weight:500;font-size:19px;min-width:150px;text-align:center">${label}</b><button class="btn" onclick="shiftMonth(1)">›</button></div>
+  <div class="grid">
+    <div class="stat c-sage"><span class="k">Income</span><b>${fm(inc)}</b><span>this month</span></div>
+    <div class="stat c-terra"><span class="k">Spent</span><b>${fm(exp)}</b><span>${totLim?'of '+fm(totLim)+' planned':'this month'}</span></div>
+    <div class="stat c-ochre"><span class="k">${totLim?'Left in plan':'Net'}</span><b>${fm(totLim?totLim-exp:inc-exp)}</b><span>${totLim?'to spend':'income minus spending'}</span></div>
+  </div>
+  <div class="card"><h3>Add entry</h3><div class="form">
+    <select id="bt" style="flex:0 1 130px"><option value="out">Expense</option><option value="in">Income</option></select>
+    <input id="bd" class="g" placeholder="Description" onkeydown="if(event.key==='Enter')addBud()">
+    <input id="ba" class="n" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Amount">
+    <select id="bc">${CATS.map(c=>`<option>${c}</option>`).join('')}</select>
+    <input id="bdt" type="date" value="${bMonth===today().slice(0,7)?today():bMonth+'-01'}">
+    <button class="btn pri" onclick="addBud()">Add</button></div></div>
+  <div class="card"><h3>Monthly plan</h3><p class="mute" style="margin:-4px 0 8px;font-size:13.5px">Set a limit for each category and watch it fill as you spend.</p>
+    ${CATS.map(c=>{const sp=by[c]||0,l=+lim[c]||0,over=l>0&&sp>l;return `<div class="limit"><span>${c}</span><div><div class="bar-wrap"><div class="bar-fill ${over?'over':''}" style="width:${l?Math.min(sp/l*100,100):0}%"></div></div><small class="${over?'late':'mute'}">${fm(sp)}${l?' of '+fm(l):''}</small></div><input type="number" inputmode="decimal" min="0" placeholder="Limit" value="${l||''}" onchange="setLimit('${c}',this.value)"></div>`}).join('')}
+  </div>
+  <div class="card"><h3>Entries</h3>${es.map(e=>`<div class="item"><span class="mute" style="font-size:12px;width:42px">${e.date.slice(5)}</span><span class="t">${esc(e.desc)} <span class="badge">${e.cat}</span></span><b style="color:var(--${e.type==='in'?'good':'bad'});white-space:nowrap">${e.type==='in'?'+':'−'}${fm(e.amt)}</b><button class="btn x" onclick="delBud('${e.id}')">✕</button></div>`).join('')||'<p class="mute" style="margin:0">No entries this month.</p>'}</div>`;
+}
+function shiftMonth(n){const [y,m]=bMonth.split('-').map(Number);const d=new Date(y,m-1+n,1);bMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);render()}
+function addBud(){const a=parseFloat(val('ba'));if(!(a>0))return;mut(()=>S.budget.push({id:uid(),type:val('bt'),desc:val('bd')||'(no description)',amt:a,cat:val('bc'),date:val('bdt')||today()}))}
+function delBud(id){mut(()=>S.budget=S.budget.filter(e=>e.id!==id))}
+function setLimit(c,v){mut(()=>{S.limits=S.limits||{};const n=parseFloat(v);if(n>0)S.limits[c]=n;else delete S.limits[c]})}
+
+/* ---------- backup ---------- */
+function exportData(){const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='planner-backup-'+today()+'.json';a.click()}
+function importData(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{S=Object.assign({},defaults,JSON.parse(r.result));save();render();toast('Restored from backup')}catch(e){alert('That file could not be read.')}};r.readAsText(f)}
+
+/* ---------- router ---------- */
+const T={
+  home:{ic:'home',l:'Home',c:'terra',eb:()=>fmtDate(today()),title:()=>{const h=new Date().getHours();return 'Good <em>'+(h<12?'morning':h<18?'afternoon':'evening')+'</em>'},r:rHome},
+  calendar:{ic:'calendar',l:'Calendar',c:'blue',eb:'Time',title:'Your <em>calendar</em>',r:rCal},
+  reminders:{ic:'bell',l:'Reminders',c:'ochre',eb:'To do',title:'Gentle <em>reminders</em>',r:rRem},
+  ideas:{ic:'bulb',l:'Ideas',c:'plum',eb:'Collect',title:'Idea <em>board</em>',r:rIdeas},
+  notes:{ic:'note',l:'Notes',c:'sage',eb:'Think',title:'Notes &amp; <em>lists</em>',r:rNotes},
+  workouts:{ic:'dumb',l:'Workouts',c:'terra',eb:'Move',title:'Daily <em>movement</em>',r:rWork},
+  calories:{ic:'leaf',l:'Calories',c:'sage',eb:'Eat',title:'Daily <em>nourishment</em>',r:rCals},
+  budget:{ic:'coin',l:'Budget',c:'ochre',eb:'Money',title:'The <em>budget</em>',r:rBud},
+  habits:{ic:'check',l:'Habits',c:'blue',eb:'Repeat',title:'Small <em>habits</em>',r:rHab},
+  goals:{ic:'target',l:'Goals',c:'plum',eb:'Aim',title:'Toward <em>something</em>',r:rGoals},
+  journal:{ic:'book',l:'Journal',c:'terra',eb:'Reflect',title:'Evening <em>pages</em>',r:rJour}
+};
+const KEYS=Object.keys(T),BOTTOM=['home','calendar','reminders','ideas'];
+let tab=T[location.hash.slice(1)]?location.hash.slice(1):'home';
+function go(t){closeSheet();if(location.hash.slice(1)===t){render();window.scrollTo(0,0)}else location.hash=t}
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);tab=T[h]?h:'home';render();window.scrollTo(0,0)});
+function toggleSheet(){$('sheet').classList.toggle('open')}
+function closeSheet(){$('sheet').classList.remove('open')}
+const navBtn=k=>`<button data-t="${k}" onclick="go('${k}')">${ico(T[k].ic)}<span>${T[k].l}</span></button>`;
+$('nav').innerHTML=KEYS.map(navBtn).join('');
+$('bnav').innerHTML=BOTTOM.map(navBtn).join('')+`<button id="morebtn" onclick="toggleSheet()">${ico('more')}<span>More</span></button>`;
+$('sheetgrid').innerHTML=KEYS.filter(k=>!BOTTOM.includes(k)).map(navBtn).join('');
+function render(){
+  const t=T[tab];
+  document.querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  $('morebtn').classList.toggle('on',!BOTTOM.includes(tab));
+  document.body.className='c-'+t.c;
+  const eb=typeof t.eb==='function'?t.eb():t.eb,ti=typeof t.title==='function'?t.title():t.title;
+  $('main').innerHTML=`<header class="ph"><div><div class="eyebrow">${esc(eb)}</div><h2>${ti}</h2></div>${art(KEYS.indexOf(tab))}</header>`+t.r();
+}
+render();
+</script>
+</body>
+</html>
